@@ -1,30 +1,8 @@
-class Student:
-    def __init__(
-        self,
-        name: str,
-        marks: list[float],
-    ) -> None:
-        self.name: str = name
-        self.marks: list[float] = marks
-
-    def is_passed(self) -> bool:
-        return (
-            sum(self.marks)
-            / len(self.marks)
-            > 50
-        )
-
-    def __str__(self) -> str:
-        return f"Student {self.name} (oceny: {self.marks})"
-
+from models import Student
 
 if __name__ == "__main__":
-    good_student = Student(
-        "Patryk", [70, 85, 90]
-    )
-    bad_student = Student(
-        "NiePatryk", [30, 45, 50]
-    )
+    good_student = Student("Patryk", [70, 85, 90])
+    bad_student = Student("NiePatryk", [30, 45, 50])
 
     print(
         good_student,
