@@ -15,10 +15,9 @@ def parse_args():
 def loop(db: FileQueue):
     while True:
         sleep(randint(5, 10))
-        task = db.find_pending_task()
+        task = db.get_and_start_pending_task()
         if task is None:
             continue
-        db.set_task_status(task, Status.IN_PROGRESS)
         sleep(30)
         db.set_task_status(task, Status.DONE)
 

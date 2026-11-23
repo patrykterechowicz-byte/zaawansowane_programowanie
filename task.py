@@ -109,6 +109,37 @@ class FileQueue:
                 return task
         return None
 
+    def get_and_start_pending_task(self) -> Task | None:
+        """
+        Under one lock, finds pending task and starts it. Returns None if no PENDING tasks found.
+        """
+        try:
+            self.__acquire_lock()
+        except LockExistsError:
+            sleep(randint(1, 5))
+            return self.get_and_start_pending_task()
+
+        with open(self.db_path, "r") as db:
+            lines = db.readlines()
+
+        result = None
+
+        for i, line in enumerate(lines):
+            itask = Task.from_str(line)
+            if itask.status == Status.PENDING:
+                result = Task(itask.task_id, Status.IN_PROGRESS)
+                lines[i] = result.to_str() + "\n"
+                break
+
+        tmp_db = self.db_path.with_suffix(".tmp")
+        with open(tmp_db, "w") as f:
+            f.writelines(lines)
+
+        os.replace(tmp_db, self.db_path)
+
+        self.__release_lock()
+        return result
+
     def set_task_status(self, task: Task, new_status: Status):
         try:
             self.__acquire_lock()
