@@ -12,9 +12,7 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    print("Appending 100 new tasks")
+    print("Appending new tasks")
     db = FileQueue(Path(args.db_path))
-    for n in range(100):
-        db.append_task(Task(n, Status.PENDING))
-
+    db.new_task()
     db.close()

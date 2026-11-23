@@ -73,10 +73,13 @@ class FileQueue:
         except FileExistsError:
             raise LockExistsError
 
+        self.__lock_acquired = True
+
     def __release_lock(self):
         if not self.__lock_acquired:
             pass
         os.remove(self.__lock_path)
+        self.__lock_acquired = False
 
     def close(self):
         """
@@ -165,15 +168,25 @@ class FileQueue:
 
         self.__release_lock()
 
-    def append_task(self, task: Task):
+    def new_task(self):
         try:
             self.__acquire_lock()
         except LockExistsError:
             sleep(randint(1, 5))
-            self.append_task(task)
+            self.new_task()
             return
 
-        with open(self.db_path, "a") as file:
-            _ = file.write(task.to_str() + "\n")
+        with open(self.db_path, "r") as db:
+            lines = db.readlines()
+
+        top_id = len(lines) + 1
+
+        lines.append(Task(top_id, Status.PENDING).to_str() + "\n")
+
+        tmp_db = self.db_path.with_suffix(".tmp")
+        with open(tmp_db, "w") as f:
+            f.writelines(lines)
+
+        os.replace(tmp_db, self.db_path)
 
         self.__release_lock()
