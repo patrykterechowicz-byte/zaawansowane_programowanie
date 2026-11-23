@@ -14,5 +14,7 @@ if __name__ == "__main__":
     args = parse_args()
     print("Appending new tasks")
     db = FileQueue(Path(args.db_path))
-    db.new_task()
-    db.close()
+    try:
+        db.new_task()
+    finally:
+        db.close()

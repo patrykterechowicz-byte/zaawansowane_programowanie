@@ -122,6 +122,10 @@ class FileQueue:
             sleep(randint(1, 5))
             return self.get_and_start_pending_task()
 
+        if not self.db_path.exists():  # no pending tasks
+            self.__release_lock()
+            return None
+
         with open(self.db_path, "r") as db:
             lines = db.readlines()
 
@@ -151,7 +155,7 @@ class FileQueue:
             self.set_task_status(task, new_status)
             return
 
-        with open(self.db_path, "r") as db:
+        with open(self.db_path) as db:
             lines = db.readlines()
 
         for i, line in enumerate(lines):
@@ -175,6 +179,9 @@ class FileQueue:
             sleep(randint(1, 5))
             self.new_task()
             return
+
+        if not self.db_path.exists():
+            self.db_path.touch()
 
         with open(self.db_path, "r") as db:
             lines = db.readlines()
